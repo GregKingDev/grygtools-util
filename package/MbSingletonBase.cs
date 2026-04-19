@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GrygTools
+namespace GrygToolsUtils
 {
     public abstract class MbSingletonBase : MonoBehaviour
     {

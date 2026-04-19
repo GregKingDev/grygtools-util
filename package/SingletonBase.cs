@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine.PlayerLoop;
 
-namespace GrygTools
+namespace GrygToolsUtils
 {
 	public abstract class SingletonBase<T> where T : class, ISingleton
 	{

@@ -6,6 +6,7 @@
   "unity": "2020.3",
   "dependencies": {
     "com.unity.addressables": "1.21.20",
-    "com.unity.textmeshpro": "3.0.6"
+    "com.unity.textmeshpro": "3.0.6",
+    "com.cysharp.unitask": "2.5.10"
   }
 }

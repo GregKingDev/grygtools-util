@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
+using Cysharp.Threading.Tasks;
 
-namespace GrygTools
+namespace GrygToolsUtils
 {
     [DisallowMultipleComponent]
     public abstract class MbSingleton<T> : MbSingletonBase where T : MonoBehaviour
@@ -23,7 +24,7 @@ namespace GrygTools
             }
         }
 
-        private static T instance;
+        protected static T instance;
 
         protected virtual void Init()
         {

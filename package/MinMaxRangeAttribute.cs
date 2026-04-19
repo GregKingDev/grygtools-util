@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace GrygTools
+namespace GrygToolsUtils
 {
 	[AttributeUsage(AttributeTargets.Field)]
 	public class MinMaxRangeAttribute : PropertyAttribute
