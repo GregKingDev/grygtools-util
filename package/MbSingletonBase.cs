@@ -1,36 +1,28 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace GrygToolsUtils
 {
-    public abstract class MbSingletonBase : MonoBehaviour
-    {
-        private static GameObject singletonRoot;
+	public abstract class MbSingletonBase : MonoBehaviour
+	{
+		private static GameObject singletonRoot;
 
-        protected static GameObject SingletonRoot
-        {
-            get
-            {
-                if (singletonRoot == null)
-                {
-                    GameObject temp = new GameObject("Temp");
-                    Object.DontDestroyOnLoad(temp);
-                    foreach (GameObject rootGameObject in temp.scene.GetRootGameObjects())
-                    {
-                        if (rootGameObject.name == "MBSingletons")
-                        {
-                            singletonRoot = rootGameObject;
-                            Destroy(temp);
-                            return rootGameObject;
-                        }
-                    }
-                    Destroy(temp);
-                     
-                    singletonRoot = new GameObject("MBSingletons");
-                    DontDestroyOnLoad(singletonRoot);
-                }
+		protected static GameObject SingletonRoot
+		{
+			get
+			{
+				if (singletonRoot == null)
+				{
+					singletonRoot = GameObject.Find("MBSingletons");
+					if(singletonRoot == null)
+					{
+						singletonRoot = new GameObject("MBSingletons");
+						DontDestroyOnLoad(singletonRoot);
+						return singletonRoot;
+					}
+				}
 
-                return singletonRoot;
-            }
-        }
-    }
+				return singletonRoot;
+			}
+		}
+	}
 }
