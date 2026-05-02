@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace GrygToolsUtils
 {
-	[CustomPropertyDrawer(typeof(MinMaxRangeAttribute))]
-	public class MinMaxRangePropertyDrawer : PropertyDrawer
+	[CustomPropertyDrawer(typeof(MinAndMaxRangeVec2Attribute))]
+	public class MinAndMaxRangeVec2PropertyDrawer : PropertyDrawer
 	{
 		private float? oldMin = null;
 		private float? oldMax = null;
@@ -14,7 +14,7 @@ namespace GrygToolsUtils
 		{
 			float lowerLimit = float.MinValue;
 			float upperLimit = float.MaxValue;
-			if (attribute is MinMaxRangeAttribute minMaxAttribute)
+			if (attribute is MinAndMaxRangeVec2Attribute minMaxAttribute)
 			{
 				lowerLimit = minMaxAttribute.min;
 				upperLimit = minMaxAttribute.max;
