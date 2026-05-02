@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using Cysharp.Threading.Tasks;
-
 namespace GrygToolsUtils
 {
     [DisallowMultipleComponent]

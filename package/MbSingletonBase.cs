@@ -16,9 +16,8 @@ namespace GrygToolsUtils
 					if(singletonRoot == null)
 					{
 						singletonRoot = new GameObject("MBSingletons");
-						DontDestroyOnLoad(singletonRoot);
-						return singletonRoot;
 					}
+					DontDestroyOnLoad(singletonRoot);
 				}
 
 				return singletonRoot;
