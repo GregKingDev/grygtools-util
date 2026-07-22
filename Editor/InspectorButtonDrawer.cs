@@ -1,4 +1,5 @@
-﻿namespace GrygToolsUtils
+﻿using System.Collections.Generic;
+namespace GrygToolsUtils
 {
 	using System;
 	using System.Reflection;
@@ -9,49 +10,112 @@
 	[CanEditMultipleObjects]
 	public class InspectorButtonDrawer : Editor
 	{
-		public override void OnInspectorGUI()
-		{
-			// 1. Draw all standard serialized variables first
-			DrawDefaultInspector();
+        private static readonly Dictionary<string, object[]> m_ParameterValues = new();
+        private static readonly Dictionary<string, bool> m_FoldoutStates = new();
 
-			// 2. Fetch all methods on the target object
-			Type type = target.GetType();
-			MethodInfo[] methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        public override void OnInspectorGUI()
+        {
+            DrawDefaultInspector();
 
-			foreach (MethodInfo method in methods)
-			{
-				// check if the method has our [Button] attribute
-				InspectorButtonAttribute buttonAttr = method.GetCustomAttribute<InspectorButtonAttribute>();
-				if (buttonAttr == null) continue;
+            Type type = target.GetType();
+            MethodInfo[] methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
-				// Enforce that the method cannot require arguments
-				if (method.GetParameters().Length > 0)
-				{
-					EditorGUILayout.HelpBox($"Method {method.Name} requires parameters and cannot be drawn as a button.", MessageType.Warning);
-					continue;
-				}
+            foreach (MethodInfo method in methods)
+            {
+                InspectorButtonAttribute buttonAttr = method.GetCustomAttribute<InspectorButtonAttribute>();
+                if (buttonAttr == null) continue;
 
-				// Determine label: use custom label if provided, otherwise clean up method name
-				string label = string.IsNullOrEmpty(buttonAttr.ButtonLabel) ? method.Name : buttonAttr.ButtonLabel;
+                if ((Application.isPlaying && buttonAttr.DrawMode == InspectorButtonDrawMode.EditorOnly) ||
+                    (!Application.isPlaying && buttonAttr.DrawMode == InspectorButtonDrawMode.RuntimeOnly))
+                    continue;
 
+                string methodKey = $"{target.GetInstanceID()}.{method.Name}";
+                string label = string.IsNullOrEmpty(buttonAttr.ButtonLabel) ? method.Name : buttonAttr.ButtonLabel;
+                ParameterInfo[] parameters = method.GetParameters();
 
-				if ((Application.isPlaying && buttonAttr.DrawMode == InspectorButtonDrawMode.EditorOnly) || (!Application.isPlaying & buttonAttr.DrawMode == InspectorButtonDrawMode.RuntimeOnly))
-				{
-					continue;
-				}
-				// 3. Render the button
-				if (GUILayout.Button(label))
-				{
-					// Record undo state so changes made by the method can be saved/undone
-					Undo.RecordObject(target, $"Trigger {method.Name}");
+                if (!m_ParameterValues.ContainsKey(methodKey))
+                {
+                    m_ParameterValues[methodKey] = new object[parameters.Length];
+                }
 
-					// Execute the method on all selected objects (supports multi-editing)
-					foreach (UnityEngine.Object targetObj in targets)
-					{
-						method.Invoke(targetObj, null);
-					}
-				}
-			}
-		}
-	}
+                if (!m_FoldoutStates.ContainsKey(methodKey))
+                {
+                    m_FoldoutStates[methodKey] = true;
+                }
+                
+                object[] paramValues = m_ParameterValues[methodKey];
+                
+                m_FoldoutStates[methodKey] = EditorGUILayout.Foldout(m_FoldoutStates[methodKey], label, true, EditorStyles.foldoutHeader);
+
+                if (m_FoldoutStates[methodKey])
+                {
+                    if (parameters.Length > 0)
+                    {
+                        EditorGUI.indentLevel++;
+
+                        for (int i = 0; i < parameters.Length; i++)
+                        {
+                            ParameterInfo param = parameters[i];
+                            paramValues[i] = DrawParameterField(param, paramValues[i]);
+                        }
+
+                        EditorGUI.indentLevel--;
+                    }
+
+                    if (GUILayout.Button(parameters.Length > 0 ? $"Invoke {label}" : label))
+                    {
+                        Undo.RecordObject(target, $"Trigger {method.Name}");
+                        foreach (UnityEngine.Object targetObj in targets)
+                        {
+                            method.Invoke(targetObj, paramValues);
+                        }
+                    }
+                }
+
+                EditorGUILayout.Space(4);
+            }
+        }
+
+        private object DrawParameterField(ParameterInfo param, object currentValue)
+        {
+            string fieldLabel = ObjectNames.NicifyVariableName(param.Name);
+            Type t = param.ParameterType;
+
+            if (t == typeof(int))
+                return EditorGUILayout.IntField(fieldLabel, currentValue is int v ? v : 0);
+
+            if (t == typeof(float))
+                return EditorGUILayout.FloatField(fieldLabel, currentValue is float v ? v : 0f);
+
+            if (t == typeof(double))
+                return (double)EditorGUILayout.DoubleField(fieldLabel, currentValue is double v ? v : 0.0);
+
+            if (t == typeof(bool))
+                return EditorGUILayout.Toggle(fieldLabel, currentValue is bool v && v);
+
+            if (t == typeof(string))
+                return EditorGUILayout.TextField(fieldLabel, currentValue is string v ? v : string.Empty);
+
+            if (t == typeof(Vector2))
+                return EditorGUILayout.Vector2Field(fieldLabel, currentValue is Vector2 v ? v : Vector2.zero);
+
+            if (t == typeof(Vector3))
+                return EditorGUILayout.Vector3Field(fieldLabel, currentValue is Vector3 v ? v : Vector3.zero);
+
+            if (t == typeof(Color))
+                return EditorGUILayout.ColorField(fieldLabel, currentValue is Color v ? v : Color.white);
+
+            if (t == typeof(AnimationCurve))
+                return EditorGUILayout.CurveField(fieldLabel, currentValue is AnimationCurve v ? v : new AnimationCurve());
+
+            if (t.IsEnum)
+                return EditorGUILayout.EnumPopup(fieldLabel, currentValue is Enum v ? v : (Enum)Enum.GetValues(t).GetValue(0));
+
+            if (typeof(UnityEngine.Object).IsAssignableFrom(t))
+                return EditorGUILayout.ObjectField(fieldLabel, currentValue as UnityEngine.Object, t, true);
+
+            EditorGUILayout.HelpBox($"Unsupported parameter type: {t.Name}", MessageType.Warning);
+            return currentValue;
+        }
+    }
 }
