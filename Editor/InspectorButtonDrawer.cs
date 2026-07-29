@@ -26,7 +26,7 @@ namespace GrygToolsUtils
                 if (buttonAttr == null) continue;
 
                 if ((Application.isPlaying && buttonAttr.DrawMode == InspectorButtonDrawMode.EditorOnly) ||
-                    (!Application.isPlaying && buttonAttr.DrawMode == InspectorButtonDrawMode.RuntimeOnly))
+                    (!Application.isPlaying && buttonAttr.DrawMode == InspectorButtonDrawMode.GameplayOnly))
                     continue;
 
                 string methodKey = $"{target.GetInstanceID()}.{method.Name}";

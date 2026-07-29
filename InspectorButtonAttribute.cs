@@ -4,8 +4,8 @@ namespace GrygToolsUtils
 	public enum InspectorButtonDrawMode
 	{
 		EditorOnly,
-		RuntimeOnly,
-		EditorAndRuntime
+		GameplayOnly,
+		EditorAndGameplay
 	}
 	
 	
@@ -15,7 +15,7 @@ namespace GrygToolsUtils
 		public string ButtonLabel { get; private set; }
 		public InspectorButtonDrawMode DrawMode { get; private set; }
 
-		public InspectorButtonAttribute(string buttonLabel = null, InspectorButtonDrawMode drawMode = InspectorButtonDrawMode.EditorAndRuntime)
+		public InspectorButtonAttribute(string buttonLabel = null, InspectorButtonDrawMode drawMode = InspectorButtonDrawMode.EditorAndGameplay)
 		{
 			ButtonLabel = buttonLabel;
 			DrawMode = drawMode;
