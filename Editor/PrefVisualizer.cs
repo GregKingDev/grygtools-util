@@ -1,26 +1,26 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
-using System.IO;
-using Microsoft.Win32;
+using System.Text;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
-
 public class PrefsVisualizer : EditorWindow
 {
-    private Vector2 playerScroll;
-    private Vector2 editorScroll;
-    private string searchFilter = "";
-    private string lastSearchFilter = "";
+    private Vector2 m_PlayerScroll;
+    private Vector2 m_EditorScroll;
+    private string m_SearchFilter = "";
+    private string m_LastSearchFilter = "";
 
     // Visibility toggles
-    private bool showPlayerPrefs = true;
-    private bool showEditorPrefs = true;
+    private bool m_ShowPlayerPrefs = true;
+    private bool m_ShowEditorPrefs = true;
 
-    private List<PrefItem> rawPlayerPrefs = new List<PrefItem>();
-    private List<PrefItem> rawEditorPrefs = new List<PrefItem>();
+    private readonly List<PrefItem> m_RawPlayerPrefs = new List<PrefItem>();
+    private readonly List<PrefItem> m_RawEditorPrefs = new List<PrefItem>();
     
-    private List<PrefItem> filteredPlayerPrefs = new List<PrefItem>();
-    private List<PrefItem> filteredEditorPrefs = new List<PrefItem>();
+    private readonly List<PrefItem> m_FilteredPlayerPrefs = new List<PrefItem>();
+    private readonly List<PrefItem> m_FilteredEditorPrefs = new List<PrefItem>();
 
     private struct PrefItem
     {
@@ -45,19 +45,19 @@ public class PrefsVisualizer : EditorWindow
         
         // Search filter row
         EditorGUI.BeginChangeCheck();
-        searchFilter = EditorGUILayout.TextField("Filter Keys:", searchFilter);
-        if (EditorGUI.EndChangeCheck() || searchFilter != lastSearchFilter)
+        m_SearchFilter = EditorGUILayout.TextField("Filter Keys:", m_SearchFilter);
+        if (EditorGUI.EndChangeCheck() || m_SearchFilter != m_LastSearchFilter)
         {
             ApplySearchFilter();
-            lastSearchFilter = searchFilter;
+            m_LastSearchFilter = m_SearchFilter;
         }
         
         GUILayout.Space(5);
 
         // Visibility Toggles Row
         EditorGUILayout.BeginHorizontal();
-        showPlayerPrefs = EditorGUILayout.ToggleLeft("Show PlayerPrefs", showPlayerPrefs, GUILayout.Width(150));
-        showEditorPrefs = EditorGUILayout.ToggleLeft("Show EditorPrefs", showEditorPrefs, GUILayout.Width(150));
+        m_ShowPlayerPrefs = EditorGUILayout.ToggleLeft("Show PlayerPrefs", m_ShowPlayerPrefs, GUILayout.Width(150));
+        m_ShowEditorPrefs = EditorGUILayout.ToggleLeft("Show EditorPrefs", m_ShowEditorPrefs, GUILayout.Width(150));
         EditorGUILayout.EndHorizontal();
 
         GUILayout.Space(10);
@@ -71,8 +71,8 @@ public class PrefsVisualizer : EditorWindow
 
         // Calculate dynamic layouts based on active columns
         int activeColumns = 0;
-        if (showPlayerPrefs) activeColumns++;
-        if (showEditorPrefs) activeColumns++;
+        if (m_ShowPlayerPrefs) activeColumns++;
+        if (m_ShowEditorPrefs) activeColumns++;
 
         if (activeColumns == 0)
         {
@@ -86,23 +86,23 @@ public class PrefsVisualizer : EditorWindow
         EditorGUILayout.BeginHorizontal();
 
         // Left Column: PlayerPrefs
-        if (showPlayerPrefs)
+        if (m_ShowPlayerPrefs)
         {
             EditorGUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(columnWidth));
-            EditorGUILayout.LabelField($"PlayerPrefs ({filteredPlayerPrefs.Count})", EditorStyles.boldLabel);
-            playerScroll = EditorGUILayout.BeginScrollView(playerScroll);
-            DrawPrefsList(filteredPlayerPrefs, columnWidth, true);
+            EditorGUILayout.LabelField($"PlayerPrefs ({m_FilteredPlayerPrefs.Count})", EditorStyles.boldLabel);
+            m_PlayerScroll = EditorGUILayout.BeginScrollView(m_PlayerScroll);
+            DrawPrefsList(m_FilteredPlayerPrefs, columnWidth, true);
             EditorGUILayout.EndScrollView();
             EditorGUILayout.EndVertical();
         }
 
         // Right Column: EditorPrefs
-        if (showEditorPrefs)
+        if (m_ShowEditorPrefs)
         {
             EditorGUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(columnWidth));
-            EditorGUILayout.LabelField($"EditorPrefs ({filteredEditorPrefs.Count})", EditorStyles.boldLabel);
-            editorScroll = EditorGUILayout.BeginScrollView(editorScroll);
-            DrawPrefsList(filteredEditorPrefs, columnWidth, false);
+            EditorGUILayout.LabelField($"EditorPrefs ({m_FilteredEditorPrefs.Count})", EditorStyles.boldLabel);
+            m_EditorScroll = EditorGUILayout.BeginScrollView(m_EditorScroll);
+            DrawPrefsList(m_FilteredEditorPrefs, columnWidth, false);
             EditorGUILayout.EndScrollView();
             EditorGUILayout.EndVertical();
         }
@@ -125,8 +125,10 @@ public class PrefsVisualizer : EditorWindow
         float keyWeightedWidth = usableRowWidth * 0.30f;
         float valueWeightedWidth = usableRowWidth * 0.70f;
         
-        GUIStyle valueStyle = new GUIStyle(EditorStyles.selectionRect);
-        valueStyle.wordWrap = true;
+        GUIStyle valueStyle = new GUIStyle(EditorStyles.selectionRect)
+        {
+            wordWrap = true
+        };
 
         // Red cross button styling
         GUIStyle deleteButtonStyle = new GUIStyle(GUI.skin.button);
@@ -167,15 +169,15 @@ public class PrefsVisualizer : EditorWindow
     
     private async void DelayedRefreshPrefsFromFileSystem()
     {
-        await System.Threading.Tasks.Task.Delay(10);
+        await Task.Delay(10);
         RefreshPrefsFromFileSystem();
         Repaint();
     }
 
     private void RefreshPrefsFromFileSystem()
     {
-        rawPlayerPrefs.Clear();
-        rawEditorPrefs.Clear();
+        m_RawPlayerPrefs.Clear();
+        m_RawEditorPrefs.Clear();
 
 #if UNITY_EDITOR_WIN
         FetchWindowsPrefs();
@@ -188,38 +190,38 @@ public class PrefsVisualizer : EditorWindow
 
     private void ApplySearchFilter()
     {
-        filteredPlayerPrefs.Clear();
-        filteredEditorPrefs.Clear();
+        m_FilteredPlayerPrefs.Clear();
+        m_FilteredEditorPrefs.Clear();
 
-        bool hasFilter = !string.IsNullOrEmpty(searchFilter);
+        bool hasFilter = !string.IsNullOrEmpty(m_SearchFilter);
 
-        for (int i = 0; i < rawPlayerPrefs.Count; i++)
+        for (int i = 0; i < m_RawPlayerPrefs.Count; i++)
         {
-            if (!hasFilter || rawPlayerPrefs[i].key.Contains(searchFilter, StringComparison.OrdinalIgnoreCase))
-                filteredPlayerPrefs.Add(rawPlayerPrefs[i]);
+            if (!hasFilter || m_RawPlayerPrefs[i].key.Contains(m_SearchFilter, StringComparison.OrdinalIgnoreCase))
+                m_FilteredPlayerPrefs.Add(m_RawPlayerPrefs[i]);
         }
 
-        for (int i = 0; i < rawEditorPrefs.Count; i++)
+        for (int i = 0; i < m_RawEditorPrefs.Count; i++)
         {
-            if (!hasFilter || rawEditorPrefs[i].key.Contains(searchFilter, StringComparison.OrdinalIgnoreCase))
-                filteredEditorPrefs.Add(rawEditorPrefs[i]);
+            if (!hasFilter || m_RawEditorPrefs[i].key.Contains(m_SearchFilter, StringComparison.OrdinalIgnoreCase))
+                m_FilteredEditorPrefs.Add(m_RawEditorPrefs[i]);
         }
     }
 
 #if UNITY_EDITOR_WIN
     private void FetchWindowsPrefs()
     {
-        string editorPlayerPrefsPath = $"Software\\Unity\\UnityEditor\\{Application.companyName}\\{Application.productName}";
-        ReadRegistryKey(editorPlayerPrefsPath, rawPlayerPrefs);
+        string editorPlayerPrefsPath = $@"Software\Unity\UnityEditor\{Application.companyName}\{Application.productName}";
+        ReadRegistryKey(editorPlayerPrefsPath, m_RawPlayerPrefs);
 
-        if (rawPlayerPrefs.Count == 0)
+        if (m_RawPlayerPrefs.Count == 0)
         {
-            string standalonePath = $"Software\\{Application.companyName}\\{Application.productName}";
-            ReadRegistryKey(standalonePath, rawPlayerPrefs);
+            string standalonePath = $@"Software\{Application.companyName}\{Application.productName}";
+            ReadRegistryKey(standalonePath, m_RawPlayerPrefs);
         }
 
-        string editorPath = $"Software\\Unity Technologies\\Unity Editor 5.x";
-        ReadRegistryKey(editorPath, rawEditorPrefs);
+        string editorPath = $@"Software\Unity Technologies\Unity Editor 5.x";
+        ReadRegistryKey(editorPath, m_RawEditorPrefs);
     }
 
     private void ReadRegistryKey(string path, List<PrefItem> targetList)
@@ -234,7 +236,7 @@ public class PrefsVisualizer : EditorWindow
                     int lastUnderscoreIndex = valueName.LastIndexOf('_');
                     if (lastUnderscoreIndex > 0)
                     {
-                        cleanKey = valueName.Substring(0, lastUnderscoreIndex);
+                        cleanKey = valueName[..lastUnderscoreIndex];
                     }
 
                     object val = key.GetValue(valueName);
@@ -242,7 +244,7 @@ public class PrefsVisualizer : EditorWindow
 
                     if (val is byte[] bytes)
                     {
-                        displayValue = System.Text.Encoding.UTF8.GetString(bytes).TrimEnd('\0');
+                        displayValue = Encoding.UTF8.GetString(bytes).TrimEnd('\0');
                     }
 
                     targetList.Add(new PrefItem { key = cleanKey, value = displayValue });
