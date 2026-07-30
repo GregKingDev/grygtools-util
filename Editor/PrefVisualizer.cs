@@ -43,7 +43,6 @@ public class PrefsVisualizer : EditorWindow
     {
         GUILayout.Space(10);
         
-        // Search filter row
         EditorGUI.BeginChangeCheck();
         m_SearchFilter = EditorGUILayout.TextField("Filter Keys:", m_SearchFilter);
         if (EditorGUI.EndChangeCheck() || m_SearchFilter != m_LastSearchFilter)
@@ -54,7 +53,6 @@ public class PrefsVisualizer : EditorWindow
         
         GUILayout.Space(5);
 
-        // Visibility Toggles Row
         EditorGUILayout.BeginHorizontal();
         m_ShowPlayerPrefs = EditorGUILayout.ToggleLeft("Show PlayerPrefs", m_ShowPlayerPrefs, GUILayout.Width(150));
         m_ShowEditorPrefs = EditorGUILayout.ToggleLeft("Show EditorPrefs", m_ShowEditorPrefs, GUILayout.Width(150));
@@ -69,7 +67,6 @@ public class PrefsVisualizer : EditorWindow
 
         GUILayout.Space(10);
 
-        // Calculate dynamic layouts based on active columns
         int activeColumns = 0;
         if (m_ShowPlayerPrefs) activeColumns++;
         if (m_ShowEditorPrefs) activeColumns++;
@@ -80,12 +77,9 @@ public class PrefsVisualizer : EditorWindow
             return;
         }
 
-        // Subtract structural spacing padding
         float columnWidth = (position.width / activeColumns) - (6 * activeColumns);
-
         EditorGUILayout.BeginHorizontal();
 
-        // Left Column: PlayerPrefs
         if (m_ShowPlayerPrefs)
         {
             EditorGUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(columnWidth));
@@ -96,7 +90,6 @@ public class PrefsVisualizer : EditorWindow
             EditorGUILayout.EndVertical();
         }
 
-        // Right Column: EditorPrefs
         if (m_ShowEditorPrefs)
         {
             EditorGUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(columnWidth));
@@ -118,7 +111,6 @@ public class PrefsVisualizer : EditorWindow
             return;
         }
 
-        // Reserve 25px for the scrollbar, and 24px for the delete button if applicable
         float deleteBtnWidth = isPlayerPrefs ? 24f : 0f;
         float usableRowWidth = allocatedColumnWidth - 25f - deleteBtnWidth; 
         
@@ -130,7 +122,6 @@ public class PrefsVisualizer : EditorWindow
             wordWrap = true
         };
 
-        // Red cross button styling
         GUIStyle deleteButtonStyle = new GUIStyle(GUI.skin.button);
         deleteButtonStyle.normal.textColor = Color.red;
         deleteButtonStyle.fontStyle = FontStyle.Bold;
@@ -141,11 +132,9 @@ public class PrefsVisualizer : EditorWindow
 
             EditorGUILayout.BeginHorizontal(GUI.skin.box, GUILayout.Height(dynamicHeight));
             
-            // Key & Value layout distribution
             EditorGUILayout.LabelField(items[i].key, EditorStyles.wordWrappedLabel, GUILayout.Width(keyWeightedWidth));
             EditorGUILayout.SelectableLabel(items[i].value, valueStyle, GUILayout.Width(valueWeightedWidth), GUILayout.Height(dynamicHeight - 4));
             
-            // Delete button rendering (Only populated inside PlayerPrefs)
             if (isPlayerPrefs)
             {
                 if (GUILayout.Button("X", deleteButtonStyle, GUILayout.Width(20), GUILayout.Height(18)))
@@ -154,11 +143,10 @@ public class PrefsVisualizer : EditorWindow
                     if (EditorUtility.DisplayDialog("Delete PlayerPref?", $"Are you sure you want to permanently erase key: '{items[i].key}'?", "Delete", "Cancel"))
                     {
                         PlayerPrefs.DeleteKey(items[i].key);
-                        PlayerPrefs.Save(); // Push changes immediately to disk
+                        PlayerPrefs.Save();
                         
                         DelayedRefreshPrefsFromFileSystem();
-                        // Instantly reload arrays to present clean UI state
-                        GUIUtility.ExitGUI(); // Prevent layout desync errors on immediate destruction passes
+                        GUIUtility.ExitGUI();
                     }
                 }
             }
@@ -253,7 +241,9 @@ public class PrefsVisualizer : EditorWindow
         }
     }
 #endif
-
+    
+    
+    //Not yet tested
 #if UNITY_EDITOR_OSX
     private void FetchMacPrefs()
     {
