@@ -35,7 +35,28 @@ namespace GrygToolsUtils
 
                 if (!m_ParameterValues.ContainsKey(methodKey))
                 {
-                    m_ParameterValues[methodKey] = new object[parameters.Length];
+                    object[] defaults = new object[parameters.Length];
+                    for (int i = 0; i < parameters.Length; i++)
+                    {
+                        ParameterInfo param = parameters[i];
+                        if (param.HasDefaultValue && param.DefaultValue != null)
+                        {
+                            defaults[i] = param.DefaultValue;
+                        }
+                        else if (param.ParameterType.IsValueType)
+                        {
+                            defaults[i] = Activator.CreateInstance(param.ParameterType);
+                        }
+                        else if (param.ParameterType == typeof(string))
+                        {
+                            defaults[i] = string.Empty;
+                        }
+                        else if (param.ParameterType == typeof(AnimationCurve))
+                        {
+                            defaults[i] = new AnimationCurve();
+                        }
+                    }
+                    m_ParameterValues[methodKey] = defaults;
                 }
 
                 if (!m_FoldoutStates.ContainsKey(methodKey))
