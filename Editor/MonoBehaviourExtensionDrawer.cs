@@ -8,7 +8,7 @@ namespace GrygToolsUtils
 
 	[CustomEditor(typeof(MonoBehaviour), true)]
 	[CanEditMultipleObjects]
-	public class InspectorButtonDrawer : Editor
+	public class MonoBehaviourExtensionDrawer : Editor
 	{
         private static readonly Dictionary<string, object[]> m_ParameterValues = new();
         private static readonly Dictionary<string, bool> m_FoldoutStates = new();
@@ -16,8 +16,41 @@ namespace GrygToolsUtils
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
-
+            
             Type type = target.GetType();
+            
+            #region PropertyInspector
+            var targetType = target.GetType();
+
+            var properties = targetType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            
+            bool drawSpacer = false;
+            
+            EditorGUI.BeginDisabledGroup(true);
+            foreach (var prop in properties)
+            {
+                ShowPropertyAttribute showPropAttribute = prop.GetCustomAttribute<ShowPropertyAttribute>();
+                if(showPropAttribute == null) continue;
+
+                if (!drawSpacer)
+                {
+                    EditorGUILayout.Space(16);
+                    drawSpacer = true;
+                }
+                
+                object value = prop.GetValue(target, null);
+                
+                DrawTypeField(prop.Name, prop.PropertyType, value);
+            }
+            EditorGUI.EndDisabledGroup();
+            #endregion
+            
+            if(drawSpacer)
+            {
+                EditorGUILayout.Space(4);
+            }
+            
+            #region InspecitorButtonAttribute
             MethodInfo[] methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
             foreach (MethodInfo method in methods)
@@ -95,13 +128,19 @@ namespace GrygToolsUtils
 
                 EditorGUILayout.Space(4);
             }
+            #endregion
         }
 
         private object DrawParameterField(ParameterInfo param, object currentValue)
         {
             string fieldLabel = ObjectNames.NicifyVariableName(param.Name);
             Type t = param.ParameterType;
+            return DrawTypeField(fieldLabel, t, currentValue);
+        }
 
+        private object DrawTypeField(string fieldName, Type t, object currentValue = null)
+        {
+            string fieldLabel = ObjectNames.NicifyVariableName(fieldName);
             if (t == typeof(int))
                 return EditorGUILayout.IntField(fieldLabel, currentValue is int v ? v : 0);
 
