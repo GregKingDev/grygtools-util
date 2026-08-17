@@ -12,7 +12,6 @@ public class PrefsVisualizer : EditorWindow
     private string m_SearchFilter = "";
     private string m_LastSearchFilter = "";
 
-    // Visibility toggles
     private bool m_ShowPlayerPrefs = true;
     private bool m_ShowEditorPrefs = true;
 
@@ -21,6 +20,9 @@ public class PrefsVisualizer : EditorWindow
     
     private readonly List<PrefItem> m_FilteredPlayerPrefs = new List<PrefItem>();
     private readonly List<PrefItem> m_FilteredEditorPrefs = new List<PrefItem>();
+
+    private int m_EditingIndex = -1;
+    private string m_EditingValue = "";
 
     private struct PrefItem
     {
@@ -111,9 +113,10 @@ public class PrefsVisualizer : EditorWindow
             return;
         }
 
-        float deleteBtnWidth = isPlayerPrefs ? 24f : 0f;
-        float usableRowWidth = allocatedColumnWidth - 25f - deleteBtnWidth; 
-        
+        float actionBtnWidth = isPlayerPrefs ? 24f : 0f;
+        float editBtnWidth = isPlayerPrefs ? 30f : 0f;
+        float usableRowWidth = allocatedColumnWidth - 25f - actionBtnWidth - editBtnWidth;
+
         float keyWeightedWidth = usableRowWidth * 0.30f;
         float valueWeightedWidth = usableRowWidth * 0.70f;
         
@@ -126,32 +129,71 @@ public class PrefsVisualizer : EditorWindow
         deleteButtonStyle.normal.textColor = Color.red;
         deleteButtonStyle.fontStyle = FontStyle.Bold;
 
+        GUIStyle saveButtonStyle = new GUIStyle(GUI.skin.button);
+        saveButtonStyle.normal.textColor = new Color(0.2f, 0.7f, 0.2f);
+        saveButtonStyle.fontStyle = FontStyle.Bold;
+
         for (int i = 0; i < items.Count; i++)
         {
-            float dynamicHeight = Mathf.Max(22, valueStyle.CalcHeight(new GUIContent(items[i].value), valueWeightedWidth));
+            bool isEditing = isPlayerPrefs && m_EditingIndex == i;
 
-            EditorGUILayout.BeginHorizontal(GUI.skin.box, GUILayout.Height(dynamicHeight));
-            
-            EditorGUILayout.LabelField(items[i].key, EditorStyles.wordWrappedLabel, GUILayout.Width(keyWeightedWidth));
-            EditorGUILayout.SelectableLabel(items[i].value, valueStyle, GUILayout.Width(valueWeightedWidth), GUILayout.Height(dynamicHeight - 4));
-            
-            if (isPlayerPrefs)
+            if (isEditing)
             {
-                if (GUILayout.Button("X", deleteButtonStyle, GUILayout.Width(20), GUILayout.Height(18)))
+                EditorGUILayout.BeginHorizontal(GUI.skin.box);
+                EditorGUILayout.LabelField(items[i].key, EditorStyles.wordWrappedLabel, GUILayout.Width(keyWeightedWidth));
+                m_EditingValue = EditorGUILayout.TextField(m_EditingValue, GUILayout.Width(valueWeightedWidth));
+
+                if (GUILayout.Button("✓", saveButtonStyle, GUILayout.Width(20), GUILayout.Height(18)))
                 {
-                    // Confirmation dialog popup prevents accidental workflow loss
-                    if (EditorUtility.DisplayDialog("Delete PlayerPref?", $"Are you sure you want to permanently erase key: '{items[i].key}'?", "Delete", "Cancel"))
+                    PlayerPrefs.SetString(items[i].key, m_EditingValue);
+                    PlayerPrefs.Save();
+                    m_EditingIndex = -1;
+                    m_EditingValue = "";
+                    DelayedRefreshPrefsFromFileSystem();
+                    GUIUtility.ExitGUI();
+                }
+
+                if (GUILayout.Button("✕", GUILayout.Width(20), GUILayout.Height(18)))
+                {
+                    m_EditingIndex = -1;
+                    m_EditingValue = "";
+                }
+
+                EditorGUILayout.EndHorizontal();
+            }
+            else
+            {
+                float dynamicHeight = Mathf.Max(22, valueStyle.CalcHeight(new GUIContent(items[i].value), valueWeightedWidth));
+
+                EditorGUILayout.BeginHorizontal(GUI.skin.box, GUILayout.Height(dynamicHeight));
+
+                EditorGUILayout.LabelField(items[i].key, EditorStyles.wordWrappedLabel, GUILayout.Width(keyWeightedWidth));
+                EditorGUILayout.SelectableLabel(items[i].value, valueStyle, GUILayout.Width(valueWeightedWidth), GUILayout.Height(dynamicHeight - 4));
+
+                if (isPlayerPrefs)
+                {
+                    if (GUILayout.Button("✎", GUILayout.Width(20), GUILayout.Height(18)))
                     {
-                        PlayerPrefs.DeleteKey(items[i].key);
-                        PlayerPrefs.Save();
-                        
-                        DelayedRefreshPrefsFromFileSystem();
-                        GUIUtility.ExitGUI();
+                        m_EditingIndex = i;
+                        m_EditingValue = items[i].value;
+                        GUI.FocusControl(null);
+                    }
+
+                    if (GUILayout.Button("X", deleteButtonStyle, GUILayout.Width(20), GUILayout.Height(18)))
+                    {
+                        if (EditorUtility.DisplayDialog("Delete PlayerPref?", $"Are you sure you want to permanently erase key: '{items[i].key}'?", "Delete", "Cancel"))
+                        {
+                            PlayerPrefs.DeleteKey(items[i].key);
+                            PlayerPrefs.Save();
+                            
+                            DelayedRefreshPrefsFromFileSystem();
+                            GUIUtility.ExitGUI();
+                        }
                     }
                 }
+
+                EditorGUILayout.EndHorizontal();
             }
-            
-            EditorGUILayout.EndHorizontal();
         }
     }
     
@@ -166,6 +208,8 @@ public class PrefsVisualizer : EditorWindow
     {
         m_RawPlayerPrefs.Clear();
         m_RawEditorPrefs.Clear();
+        m_EditingIndex = -1;
+        m_EditingValue = "";
 
 #if UNITY_EDITOR_WIN
         FetchWindowsPrefs();
