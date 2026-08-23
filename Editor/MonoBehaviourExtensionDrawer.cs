@@ -116,7 +116,7 @@ namespace GrygToolsUtils
                         EditorGUI.indentLevel--;
                     }
 
-                    if (GUILayout.Button(parameters.Length > 0 ? $"Invoke {label}" : label))
+                    if (GUILayout.Button(parameters.Length > 0 ? $"{label}" : label))
                     {
                         Undo.RecordObject(target, $"Trigger {method.Name}");
                         foreach (UnityEngine.Object targetObj in targets)

@@ -14,7 +14,7 @@ namespace GrygToolsUtils
 		[HideInInspector]
 		public string name = "Weighted Entry";
 		
-		[Min(1)]
+		[Min(0)]
 		public uint Weight;
 		public T Contents;
 
@@ -26,18 +26,19 @@ namespace GrygToolsUtils
 	}
 	
 	[Serializable]
-	public class WeightedList<T> : IEnumerable<T>
+	public class WeightedList<T> : IEnumerable<T>, ISerializationCallbackReceiver
 	{
 		[HideInInspector]
 		public string name = $"Weighted {nameof(T)}";
 		
-		[FormerlySerializedAs("m_RunningWeight")]
 		[ReadOnly]
 		[SerializeField]
 		private uint m_TotalWeight = 0;
 
 		[SerializeField]
 		private List<WeightedListEntry<T>> m_Entries = new();
+		
+		private bool m_Initialized = false;
 
 		public void Add(uint weight, T content)
 		{
@@ -74,9 +75,24 @@ namespace GrygToolsUtils
 			}
 			m_Entries.RemoveRange(index, count);
 		}
-
-		public T GetRandomEntry()
+		
+		public T RandomUnweightedValue()
 		{
+			if (m_Entries.Count <= 0)
+			{
+				throw new("Weighted List is empty, unable to get random entry");
+			}
+			return m_Entries.RandomValue().Contents;
+		}
+
+		public T RandomValue()
+		{
+			if(m_Initialized == false)
+			{
+				TallyWeight();
+				m_Initialized = true;
+			}
+			
 			if (m_Entries.Count <= 0)
 			{
 				throw new("Weighted List is empty, unable to get random entry");
@@ -87,7 +103,7 @@ namespace GrygToolsUtils
 			for (int i = 0; i < m_Entries.Count; i++)
 			{
 				runningWeight += m_Entries[i].Weight;
-				if (target < runningWeight)
+				if (target < runningWeight && m_Entries[i].Weight > 0)
 				{
 					return m_Entries[i].Contents;
 				}
@@ -104,5 +120,22 @@ namespace GrygToolsUtils
 			}
 		}
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+		private void TallyWeight()
+		{
+			m_TotalWeight = 0;
+			foreach (WeightedListEntry<T> entry in m_Entries)
+			{
+				m_TotalWeight += entry.Weight;
+			}
+		}
+		
+		public void OnBeforeSerialize() { }
+
+		public void OnAfterDeserialize()
+		{
+			m_Initialized = false;
+			TallyWeight();
+		}
 	}
 }
