@@ -84,6 +84,33 @@ namespace GrygToolsUtils
 			}
 			return m_Entries.RandomValue().Contents;
 		}
+		
+		public bool TryRandomUnweightedValue(Predicate<T> predicate, out T value)
+		{
+			if (m_Entries.Count <= 0)
+			{
+				value = default(T);
+				return false;
+			}
+
+			List<WeightedListEntry<T>> validEntries = new List<WeightedListEntry<T>>();
+			foreach (WeightedListEntry<T> entry in m_Entries)
+			{
+				if (predicate == null || predicate(entry.Contents))
+				{
+					validEntries.Add(entry);
+				}
+			}
+			
+			if (validEntries.Count <= 0)
+			{
+				value = default(T);
+				return false;
+			}
+
+			value =  validEntries[Random.Range(0, (int)validEntries.Count)].Contents;
+			return true;
+		}
 
 		public T RandomValue()
 		{
@@ -110,6 +137,47 @@ namespace GrygToolsUtils
 			}
 			
 			throw new($"Weighted List failed to get random entry");
+		}
+
+		public bool TryGetRandomValue(Predicate<T> predicate, out T value)
+		{
+			if (m_Entries.Count <= 0)
+			{
+				value = default(T);
+				return false;
+			}
+
+			if (predicate == null)
+			{
+				value = RandomValue();
+				return true;
+			}
+			
+			List<WeightedListEntry<T>> validEntries = new List<WeightedListEntry<T>>();
+			uint newTally = 0;
+			foreach (WeightedListEntry<T> entry in m_Entries)
+			{
+				if (predicate(entry.Contents))
+				{
+					newTally += entry.Weight;
+					validEntries.Add(entry);
+				}
+			}
+			
+			int target = Random.Range(0, (int)newTally);
+			uint runningTally = 0;
+			for (int i = 0; i < validEntries.Count; i++)
+			{
+				runningTally += validEntries[i].Weight;
+				if (target < runningTally && validEntries[i].Weight > 0)
+				{
+					value = validEntries[i].Contents;
+					return true;
+				}
+			}
+			
+			value = default(T);
+			return false;
 		}
 		
 		public IEnumerator<T> GetEnumerator()
