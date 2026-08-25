@@ -17,7 +17,7 @@ namespace GrygToolsUtils
 		{
 			var totalWeightProp = property.FindPropertyRelative("m_TotalWeight");
     
-			position.height = EditorGUIUtility.singleLineHeight;  // constrain height
+			position.height = EditorGUIUtility.singleLineHeight;
     
 			EditorGUI.BeginDisabledGroup(true);
 			EditorGUI.PropertyField(position, totalWeightProp);
@@ -25,7 +25,7 @@ namespace GrygToolsUtils
 			position.y += EditorGUI.GetPropertyHeight(totalWeightProp) + EditorGUIUtility.standardVerticalSpacing;
     
 			var entriesProp = property.FindPropertyRelative("m_Entries");
-			position.height = EditorGUI.GetPropertyHeight(entriesProp, true);  // restore height for entries
+			position.height = EditorGUI.GetPropertyHeight(entriesProp, true);
 
 			var genericArgs = fieldInfo.FieldType.GetGenericArguments();
 			var typeName = genericArgs.Length > 0 ? genericArgs[0].Name : "Entry";

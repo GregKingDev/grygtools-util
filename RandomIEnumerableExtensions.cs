@@ -426,5 +426,30 @@ namespace GrygToolsUtils
 			return true;
 		}
 #endregion
+
+#region Shuffle Extensions
+		public static void Shuffle<T>(this List<T> list)
+		{
+			int n = list.Count;
+			while (n > 1)
+			{
+				n--;
+				int k = r.Next(n + 1);
+				(list[k], list[n]) = (list[n], list[k]);
+			}
+		}
+		
+		public static void Shuffle<T>(this T[] array)
+		{
+			int n = array.Length;
+			while (n > 1)
+			{
+				n--;
+				int k = r.Next(n + 1);
+				(array[k], array[n]) = (array[n], array[k]);
+			}
+		}
+		
+#endregion
 	}
 }
