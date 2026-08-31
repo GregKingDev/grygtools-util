@@ -12,8 +12,27 @@ namespace GrygToolsUtils
 	/// </summary>
 	public static class RandomIEnumerableExtensions
 	{
-		private static Random r = new Random();
+		private static Random s_R = new Random();
+		
+		/// <summary>
+		/// Set the random seed for the static Random instance used by the extension methods. This allows for reproducible random sequences.
+		/// </summary>
+		/// <param name="seed"></param>
+		public static void SetRandomSeed(int seed)
+		{
+			s_R = new Random(seed);
+		}
+		
+		/// <summary>
+		/// Set the Random instance used by the extension methods. This allows for reproducible random sequences.
+		/// </summary>
+		/// <param name="r"></param>
+		public static void SetRandom(Random r)
+		{
+			s_R = r;
+		}
 #region IEnumerable Random Value Extension Methods. Includes List, Array, HashSet, and IEnumerable.
+
 		/// <summary>
 		/// Returns random value from a List<T>. If the list is empty, returns default(T) and logs an error.
 		/// </summary>
@@ -22,6 +41,19 @@ namespace GrygToolsUtils
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		public static T RandomValue<T>(this List<T> sourceList)
+		{
+			return sourceList.RandomValue(s_R);
+		}
+		
+		/// <summary>
+		/// Returns random value from a List<T>. If the list is empty, returns default(T) and logs an error.
+		/// </summary>
+		/// <param name="sourceList"></param>
+		/// <param name="r">Random instance to use for generating random index</param>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static T RandomValue<T>(this List<T> sourceList, Random r)
 		{
 			if (sourceList == null)
 			{
@@ -37,7 +69,7 @@ namespace GrygToolsUtils
 			int index = r.Next(sourceList.Count);
 			return sourceList[index];
 		}
-		
+
 		/// <summary>
 		/// Returns a random value from a List<T> that matches the given predicate. If no matching values are found, returns default(T). Return false if List is null, empty or no values match predicate
 		/// </summary>
@@ -48,6 +80,21 @@ namespace GrygToolsUtils
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		public static bool TryGetRandomValue<T>(this List<T> sourceList, Predicate<T> predicate, out T value)
+		{
+			return sourceList.TryGetRandomValue(s_R, predicate, out value);
+		}
+		
+		/// <summary>
+		/// Returns a random value from a List<T> that matches the given predicate. If no matching values are found, returns default(T). Return false if List is null, empty or no values match predicate
+		/// </summary>
+		/// <param name="sourceList"></param>
+		/// <param name="r">Random instance to use for generating random index</param>
+		/// <param name="predicate">Predicate items much match to be considered. If null all values are considered valid</param>
+		/// <param name="value"></param>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static bool TryGetRandomValue<T>(this List<T> sourceList, Random r, Predicate<T> predicate, out T value)
 		{
 			if (sourceList == null)
 			{
@@ -78,7 +125,7 @@ namespace GrygToolsUtils
 			value = validValues[r.Next(validValues.Count)];
 			return true;
 		}
-		
+
 		/// <summary>
 		/// Returns random value from an Array<T>. If the array is empty, returns default(T) and logs an error.
 		/// </summary>
@@ -87,6 +134,19 @@ namespace GrygToolsUtils
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		public static T RandomValue<T>(this T[] sourceArray)
+		{
+			return sourceArray.RandomValue(s_R);
+		}
+		
+		/// <summary>
+		/// Returns random value from an Array<T>. If the array is empty, returns default(T) and logs an error.
+		/// </summary>
+		/// <param name="sourceArray"></param>
+		/// <param name="r">Random instance to use for generating random index</param>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static T RandomValue<T>(this T[] sourceArray, Random r)
 		{
 			if (sourceArray == null)
 			{
@@ -102,7 +162,7 @@ namespace GrygToolsUtils
 			int index = r.Next(sourceArray.Length);
 			return sourceArray[index];
 		}
-		
+
 		/// <summary>
 		/// Returns a random value from a Array<T> that matches the given predicate. If no matching values are found, returns default(T). Return false if array is null, empty or no values match predicate
 		/// </summary>
@@ -113,6 +173,21 @@ namespace GrygToolsUtils
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		public static bool TryGetRandomValue<T>(this T[] sourceArray, Predicate<T> predicate, out T value)
+		{
+			return sourceArray.TryGetRandomValue(s_R, predicate, out value);
+		}
+		
+		/// <summary>
+		/// Returns a random value from a Array<T> that matches the given predicate. If no matching values are found, returns default(T). Return false if array is null, empty or no values match predicate
+		/// </summary>
+		/// <param name="sourceArray"></param>
+		/// <param name="r">Random instance to use for generating random index</param>
+		/// <param name="predicate">Predicate items much match to be considered. If null all values are considered valid</param>
+		/// <param name="value"></param>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static bool TryGetRandomValue<T>(this T[] sourceArray, Random r, Predicate<T> predicate, out T value)
 		{
 			if (sourceArray == null)
 			{
@@ -144,7 +219,7 @@ namespace GrygToolsUtils
 			value = validValues[index];
 			return true;
 		}
-		
+
 		/// <summary>
 		/// Returns random value from a HashSet<T>. If the hashset is empty, returns default(T) and logs an error.
 		/// </summary>
@@ -153,6 +228,19 @@ namespace GrygToolsUtils
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		public static T RandomValue<T>(this HashSet<T> sourceHashSet)
+		{
+			return sourceHashSet.RandomValue(s_R);
+		}
+		
+		/// <summary>
+		/// Returns random value from a HashSet<T>. If the hashset is empty, returns default(T) and logs an error.
+		/// </summary>
+		/// <param name="sourceHashSet"></param>
+		/// <param name="r">Random instance to use for generating random index</param>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static T RandomValue<T>(this HashSet<T> sourceHashSet, Random r)
 		{
 			if (sourceHashSet == null)
 			{
@@ -177,7 +265,7 @@ namespace GrygToolsUtils
 			}
 			throw new InvalidOperationException("Source HashSet is empty.");
 		}
-		
+
 		/// <summary>
 		/// Returns random value from a IEnumerable<T>. If the IEnumberable is empty, returns default(T) and logs an error.
 		/// Has garbage collection overhead due to the need to iterate through the collection to find a random value. Avoid in hotpaths or change to a List<T> or Array<T> if possible.
@@ -187,6 +275,20 @@ namespace GrygToolsUtils
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		public static T RandomValue<T>(this IEnumerable<T> sourceEnumerable)
+		{
+			return sourceEnumerable.RandomValue(s_R);
+		}
+		
+		/// <summary>
+		/// Returns random value from a IEnumerable<T>. If the IEnumberable is empty, returns default(T) and logs an error.
+		/// Has garbage collection overhead due to the need to iterate through the collection to find a random value. Avoid in hotpaths or change to a List<T> or Array<T> if possible.
+		/// </summary>
+		/// <param name="sourceEnumerable"></param>
+		/// <param name="r">Random instance to use for generating random index</param>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static T RandomValue<T>(this IEnumerable<T> sourceEnumerable, Random r)
 		{
 			if (sourceEnumerable == null)
 			{
@@ -217,7 +319,7 @@ namespace GrygToolsUtils
 			}
 			throw new InvalidOperationException("Source enumerable is empty.");
 		}
-		
+
 		/// <summary>
 		/// Returns a random value from a IEnumerable<T> that matches the given predicate. If no matching values are found, returns default(T). Return false if IEnumerable is null, empty or no values match predicate
 		/// This method has garbage collection overhead due to the need to iterate through the collection to find a random value. Avoid in hotpaths or change to a List<T> or Array<T> if possible.
@@ -229,6 +331,22 @@ namespace GrygToolsUtils
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		public static bool TryGetRandomValue<T>(this IEnumerable<T> sourceEnumerable, Predicate<T> predicate, out T value)
+		{
+			return sourceEnumerable.TryGetRandomValue(s_R, predicate, out value);
+		}
+		
+		/// <summary>
+		/// Returns a random value from a IEnumerable<T> that matches the given predicate. If no matching values are found, returns default(T). Return false if IEnumerable is null, empty or no values match predicate
+		/// This method has garbage collection overhead due to the need to iterate through the collection to find a random value. Avoid in hotpaths or change to a List<T> or Array<T> if possible.
+		/// </summary>
+		/// <param name="sourceEnumerable"></param>
+		/// <param name="r">Random instance to use for generating random index</param>
+		/// <param name="predicate"></param>
+		/// <param name="value"></param>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static bool TryGetRandomValue<T>(this IEnumerable<T> sourceEnumerable, Random r, Predicate<T> predicate, out T value)
 		{
 			if (sourceEnumerable == null)
 			{
@@ -256,6 +374,7 @@ namespace GrygToolsUtils
 #endregion
 		
 #region Dictionary Random extensions
+
 		/// <summary>
 		/// Returns random value from a Dictionary<TKey, TValue>. If the dictionary is empty, returns default(TValue) and logs an error.
 		/// </summary>
@@ -265,6 +384,20 @@ namespace GrygToolsUtils
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		public static TValue RandomValue<TKey, TValue>(this Dictionary<TKey, TValue> sourceDictionary)
+		{
+			return sourceDictionary.RandomValue(s_R);
+		}
+		
+		/// <summary>
+		/// Returns random value from a Dictionary<TKey, TValue>. If the dictionary is empty, returns default(TValue) and logs an error.
+		/// </summary>
+		/// <param name="sourceDictionary"></param>
+		/// <param name="r">Random instance to use for generating random index</param>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static TValue RandomValue<TKey, TValue>(this Dictionary<TKey, TValue> sourceDictionary, Random r)
 		{
 			if (sourceDictionary == null)
 			{
@@ -289,7 +422,7 @@ namespace GrygToolsUtils
 			}
 			throw new InvalidOperationException("Source enumerable is empty.");
 		}
-		
+
 		/// /// <summary>
 		/// Returns random key from a Dictionary<TKey, TValue>. If the dictionary is empty, returns default(TKey) and logs an error.
 		/// </summary>
@@ -299,6 +432,20 @@ namespace GrygToolsUtils
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		public static TKey RandomKey<TKey, TValue>(this Dictionary<TKey, TValue> sourceDictionary)
+		{
+			return sourceDictionary.RandomKey(s_R);
+		}
+		
+		/// /// <summary>
+		/// Returns random key from a Dictionary<TKey, TValue>. If the dictionary is empty, returns default(TKey) and logs an error.
+		/// </summary>
+		/// <param name="sourceDictionary"></param>
+		/// <param name="r">Random instance to use for generating random index</param>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static TKey RandomKey<TKey, TValue>(this Dictionary<TKey, TValue> sourceDictionary, Random r)
 		{
 			if (sourceDictionary == null)
 			{
@@ -335,20 +482,36 @@ namespace GrygToolsUtils
 		/// <returns></returns>
 		public static bool TryGetRandomValue<TKey, TValue>(this Dictionary<TKey, TValue> sourceDictionary, Predicate<TValue> valuePredicate, out TValue value)
 		{
-			return TryGetRandomValue(sourceDictionary, null, valuePredicate, out value);
+			return sourceDictionary.TryGetRandomValue(s_R, valuePredicate, out value);
+		}
+
+		/// <summary>
+		/// Get a random value from a Dictionary<TKey, TValue> that matches the given predicate. If no matching values are found, returns default(TValue). Return false if Dictionary is null, empty or no items match predicate
+		/// </summary>
+		/// <param name="sourceDictionary"></param>
+		/// <param name="r">Random instance to use for generating random index</param>
+		/// <param name="valuePredicate">Predicate to determine validity of values</param>
+		/// <param name="value"></param>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <returns></returns>
+		public static bool TryGetRandomValue<TKey, TValue>(this Dictionary<TKey, TValue> sourceDictionary, Random r, Predicate<TValue> valuePredicate, out TValue value)
+		{
+			return TryGetRandomValue(sourceDictionary, r, null, valuePredicate, out value);
 		}
 		
 		/// <summary>
 		/// Get a random value from a Dictionary<TKey, TValue> that matches the given predicate. If no matching values are found, returns default(TValue). Return false if Dictionary is null, empty or no items match predicate
 		/// </summary>
 		/// <param name="sourceDictionary"></param>
+		/// <param name="r">Random instance to use for generating random index</param>
 		/// <param name="keyPredicate">Predicate to determine validity of keys</param>
 		/// <param name="valuePredicate">Predicate to determine validity of values</param>
 		/// <param name="value"></param>
 		/// <typeparam name="TKey"></typeparam>
 		/// <typeparam name="TValue"></typeparam>
 		/// <returns></returns>
-		public static bool TryGetRandomValue<TKey, TValue>(this Dictionary<TKey, TValue> sourceDictionary, Predicate<TKey> keyPredicate, Predicate<TValue> valuePredicate, out TValue value)
+		public static bool TryGetRandomValue<TKey, TValue>(this Dictionary<TKey, TValue> sourceDictionary, Random r, Predicate<TKey> keyPredicate, Predicate<TValue> valuePredicate, out TValue value)
 		{
 			if (sourceDictionary == null || sourceDictionary.Count == 0)
 			{
@@ -374,7 +537,7 @@ namespace GrygToolsUtils
 			value = validList[r.Next(validList.Count)];
 			return true;
 		}
-		
+
 		/// <summary>
 		/// Get a random key from a Dictionary<TKey, TValue> that matches the given predicate. If no matching keys are found, returns default(TValue). Return false if Dictionary is null, empty or no items match predicate
 		/// </summary>
@@ -386,20 +549,36 @@ namespace GrygToolsUtils
 		/// <returns></returns>
 		public static bool TryGetRandomKey<TKey, TValue>(this Dictionary<TKey, TValue> sourceDictionary, Predicate<TKey> keyPredicate, out TKey value)
 		{
-			return TryGetRandomKey(sourceDictionary, keyPredicate, null, out value);
+			return sourceDictionary.TryGetRandomKey(s_R, keyPredicate, null, out value);
 		}
 		
 		/// <summary>
 		/// Get a random key from a Dictionary<TKey, TValue> that matches the given predicate. If no matching keys are found, returns default(TValue). Return false if Dictionary is null, empty or no items match predicate
 		/// </summary>
 		/// <param name="sourceDictionary"></param>
+		/// <param name="r">Random instance to use for generating random index</param>
+		/// <param name="valuePredicate">Predicate to determine validity of values</param>
+		/// <param name="value"></param>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <returns></returns>
+		public static bool TryGetRandomKey<TKey, TValue>(this Dictionary<TKey, TValue> sourceDictionary, Random r, Predicate<TKey> keyPredicate, out TKey value)
+		{
+			return TryGetRandomKey(sourceDictionary, r, keyPredicate, null, out value);
+		}
+		
+		/// <summary>
+		/// Get a random key from a Dictionary<TKey, TValue> that matches the given predicate. If no matching keys are found, returns default(TValue). Return false if Dictionary is null, empty or no items match predicate
+		/// </summary>
+		/// <param name="sourceDictionary"></param>
+		/// <param name="r">Random instance to use for generating random index</param>
 		/// <param name="keyPredicate">Predicate to determine validity of keys</param>
 		/// <param name="valuePredicate">Predicate to determine validity of values</param>
 		/// <param name="value"></param>
 		/// <typeparam name="TKey"></typeparam>
 		/// <typeparam name="TValue"></typeparam>
 		/// <returns></returns>
-		public static bool TryGetRandomKey<TKey, TValue>(this Dictionary<TKey, TValue> sourceDictionary, Predicate<TKey> keyPredicate, Predicate<TValue> valuePredicate, out TKey value)
+		public static bool TryGetRandomKey<TKey, TValue>(this Dictionary<TKey, TValue> sourceDictionary, Random r, Predicate<TKey> keyPredicate, Predicate<TValue> valuePredicate, out TKey value)
 		{
 			if (sourceDictionary == null || sourceDictionary.Count == 0)
 			{
@@ -428,7 +607,12 @@ namespace GrygToolsUtils
 #endregion
 
 #region Shuffle Extensions
+
 		public static void Shuffle<T>(this List<T> list)
+		{
+			list.Shuffle(s_R);
+		}
+		public static void Shuffle<T>(this List<T> list, Random r)
 		{
 			int n = list.Count;
 			while (n > 1)
@@ -438,8 +622,13 @@ namespace GrygToolsUtils
 				(list[k], list[n]) = (list[n], list[k]);
 			}
 		}
-		
+
 		public static void Shuffle<T>(this T[] array)
+		{
+			array.Shuffle(s_R);
+		}
+		
+		public static void Shuffle<T>(this T[] array, Random r)
 		{
 			int n = array.Length;
 			while (n > 1)
