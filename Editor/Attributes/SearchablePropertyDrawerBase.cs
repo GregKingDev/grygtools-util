@@ -1,10 +1,11 @@
-﻿using System;
+﻿using GrygTools.Utils.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Attributes
 {
 	public abstract class SearchablePropertyDrawerBase<TObj> : PropertyDrawer
 	{

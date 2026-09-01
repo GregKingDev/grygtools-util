@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Attributes
 {
 	[AttributeUsage(AttributeTargets.Field)]
 	public class MinAndMaxRangeVec2Attribute : PropertyAttribute

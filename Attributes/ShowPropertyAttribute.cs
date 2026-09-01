@@ -1,5 +1,5 @@
 ﻿using System;
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Attributes
 {
 	[AttributeUsage(AttributeTargets.Property)]
 	public class ShowPropertyAttribute : Attribute

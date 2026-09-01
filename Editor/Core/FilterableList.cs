@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Core
 {
     internal struct Entry
     {

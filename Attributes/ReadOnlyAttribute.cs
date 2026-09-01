@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Attributes
 {
 	public class ReadOnlyAttribute : PropertyAttribute
 	{

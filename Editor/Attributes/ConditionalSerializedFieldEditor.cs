@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Attributes
 {
 	/// <summary>
 	/// Conditionally shows this serialized field in editor. First field is the name of the property to check second is the value.

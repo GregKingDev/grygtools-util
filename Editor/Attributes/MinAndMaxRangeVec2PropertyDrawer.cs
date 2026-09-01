@@ -1,8 +1,7 @@
-﻿using GrygToolsUtils;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Attributes
 {
 	[CustomPropertyDrawer(typeof(MinAndMaxRangeVec2Attribute))]
 	public class MinAndMaxRangeVec2PropertyDrawer : PropertyDrawer

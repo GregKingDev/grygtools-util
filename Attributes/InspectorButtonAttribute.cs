@@ -1,5 +1,5 @@
 ﻿using System;
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Attributes
 {
 	public enum InspectorButtonDrawMode
 	{

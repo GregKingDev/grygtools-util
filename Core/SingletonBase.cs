@@ -1,5 +1,5 @@
 ﻿using System;
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Core
 {
 	public abstract class SingletonBase<T> where T : class, ISingleton
 	{

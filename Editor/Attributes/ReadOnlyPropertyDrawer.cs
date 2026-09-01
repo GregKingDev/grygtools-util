@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Attributes
 {
 	[CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
 	public class ReadOnlyPropertyDrawer : PropertyDrawer

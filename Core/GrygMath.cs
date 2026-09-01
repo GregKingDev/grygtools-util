@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Core
 {
 	public static class GrygMath
 	{

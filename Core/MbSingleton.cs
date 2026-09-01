@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Core
 {
     [DisallowMultipleComponent]
     public abstract class MbSingleton<T> : MbSingletonBase where T : MonoBehaviour

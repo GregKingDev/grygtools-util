@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using Random = System.Random;
 
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Extensions
 {
 	/// <summary>
 	/// Extension methods for IEnumerable<T> to get random values from collections like List, Array, HashSet, and Dictionary.
@@ -638,7 +640,6 @@ namespace GrygToolsUtils
 				(array[k], array[n]) = (array[n], array[k]);
 			}
 		}
-		
 #endregion
 	}
 }

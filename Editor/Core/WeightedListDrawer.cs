@@ -1,8 +1,6 @@
 ﻿using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.UIElements;
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Core
 {
 	[CustomPropertyDrawer(typeof(WeightedList<>))]
 	public class WeightedListDrawer : PropertyDrawer

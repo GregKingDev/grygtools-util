@@ -1,12 +1,12 @@
-﻿using System;
+﻿using GrygTools.Utils.Attributes;
+using GrygTools.Utils.Extensions;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
-using Object = System.Object;
 using Random = UnityEngine.Random;
 
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Core
 {
 	[Serializable]
 	public class WeightedListEntry<T>

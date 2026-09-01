@@ -1,90 +1,66 @@
-using System;
+﻿using System;
 using UnityEditor;
 using UnityEngine;
-
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Core
 {
-    public class SearchablePopup : PopupWindowContent
-    {
-        private const float k_SearchOffset = 6f;
-        private const float k_WindowHeight = 600f;
+	public class FilterableSelectablePopup : PopupWindowContent
+	{
+		protected const float k_WindowHeight = 600f;
         
-        private readonly Action<int> m_OnSelect;
-        private readonly int m_CurrentIndex;
-        private readonly FilterableList m_FilterableList;
-        private Vector2 m_Scroll;
-        private int m_HoverIndex;
-        private int m_ScrollToIndex;
-        private float m_ScrollOffset;
-        
-        private readonly float m_MaxWidth = 200;
-        
-        public static void Show(Rect sourceRect, string[] options, int current, Action<int> onSelect)
-        {
-            SearchablePopup win = new SearchablePopup(options, current, onSelect);
-            PopupWindow.Show(sourceRect, win);
-        }
-
-        private static void DrawHighlight(Rect rect, Color color)
-        {
-            Color tempColor = GUI.color;
-            GUI.color = color;
-            GUI.Box(rect, new GUIContent(), "SelectionRect");
-            GUI.color = tempColor;
-        }
-        
-        private SearchablePopup(string[] names, int mCurrentIndex, Action<int> mOnSelect)
-        {
-            m_FilterableList = new FilterableList(names);
+		private readonly FilterableList m_FilterableList;
+		protected readonly Action<int> m_OnSelect;
+		protected readonly int m_CurrentIndex;
+		protected Vector2 m_Scroll;
+		protected int m_HoverIndex;
+		protected int m_ScrollToIndex;
+		protected float m_ScrollOffset;
+		
+		protected readonly float m_MaxWidth = 200;
+		
+		public static void Show(Rect sourceRect, string serachString, string[] options, int current, Action<int> onSelect)
+		{
+			FilterableSelectablePopup win = new FilterableSelectablePopup(options, serachString, current, onSelect);
+			PopupWindow.Show(sourceRect, win);
+		}
+		
+		protected static void DrawHighlight(Rect rect, Color color)
+		{
+			Color tempColor = GUI.color;
+			GUI.color = color;
+			GUI.Box(rect, new GUIContent(), "SelectionRect");
+			GUI.color = tempColor;
+		}
+		
+		private FilterableSelectablePopup(string[] names, string searchString, int mCurrentIndex, Action<int> mOnSelect)
+		{
+			m_FilterableList = new FilterableList(names);
+			m_FilterableList.UpdateFilter(searchString);
+			foreach (string name in names)
+			{
+				m_MaxWidth = Mathf.Max(GUI.skin.label.CalcSize(new GUIContent(name)).x, m_MaxWidth);
+			}
+			m_CurrentIndex = mCurrentIndex;
+			m_OnSelect = mOnSelect;
             
-            foreach (string name in names)
-            {
-                m_MaxWidth = Mathf.Max(GUI.skin.label.CalcSize(new GUIContent(name)).x, m_MaxWidth);
-            }
-            m_CurrentIndex = mCurrentIndex;
-            m_OnSelect = mOnSelect;
-            
-            m_HoverIndex = mCurrentIndex;
-            m_ScrollToIndex = mCurrentIndex;
-            m_ScrollOffset = GetWindowSize().y - EditorGUIUtility.singleLineHeight * 2;
-        }
+			m_HoverIndex = mCurrentIndex;
+			m_ScrollToIndex = mCurrentIndex;
+			m_ScrollOffset = GetWindowSize().y - EditorGUIUtility.singleLineHeight * 2;
+		}
+		
+		public override Vector2 GetWindowSize()
+		{
+			return new Vector2(m_MaxWidth, Mathf.Min(k_WindowHeight, m_FilterableList.MaxLength * EditorGUIUtility.singleLineHeight));
+		}
         
-        public override Vector2 GetWindowSize()
-        {
-            return new Vector2(m_MaxWidth, Mathf.Min(k_WindowHeight, m_FilterableList.MaxLength * EditorGUIUtility.singleLineHeight + EditorStyles.toolbar.fixedHeight));
-        }
-        
-        public override void OnGUI(Rect rect)
-        {
-            Rect searchRect = new Rect(0, 0, rect.width, EditorStyles.toolbar.fixedHeight);
-            Rect scrollRect = Rect.MinMaxRect(0, searchRect.yMax, rect.xMax, rect.yMax);
+		public override void OnGUI(Rect rect)
+		{
+			Rect scrollRect = Rect.MinMaxRect(0, 0, rect.xMax, rect.yMax);
 
-            HandleKeyboard();
-            DrawSearch(searchRect);
-            DrawSelectionArea(scrollRect);
-        }
-        
-        private void DrawSearch(Rect rect)
-        {
-            Rect searchRect = new Rect(rect);
-            searchRect.xMin += k_SearchOffset;
-            searchRect.xMax -= k_SearchOffset;
-            searchRect.y += 2;
-            
-            GUI.FocusControl("SearchablePopup");
-            GUI.SetNextControlName("SearchablePopup");
-            string newText = EditorGUI.TextField(searchRect, m_FilterableList.Filter);
-
-            if (m_FilterableList.UpdateFilter(newText))
-            {
-                m_HoverIndex = 0;
-                m_Scroll = Vector2.zero;
-            }
-
-            searchRect.x = searchRect.xMax;
-        }
-        
-        private void DrawSelectionArea(Rect scrollRect)
+			HandleKeyboard();
+			DrawSelectionArea(scrollRect);
+		}
+		
+		private void DrawSelectionArea(Rect scrollRect)
         {
             Rect contentRect = new Rect(0, 0, scrollRect.width - GUI.skin.verticalScrollbar.fixedWidth, m_FilterableList.Entries.Count * EditorGUIUtility.singleLineHeight);
             Rect rowRect = new Rect(0, 0, scrollRect.width, EditorGUIUtility.singleLineHeight);
@@ -177,5 +153,5 @@ namespace GrygToolsUtils
                 }
             }
         }
-    }
+	}
 }

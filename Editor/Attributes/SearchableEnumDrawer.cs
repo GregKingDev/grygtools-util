@@ -1,8 +1,9 @@
-﻿using System;
+﻿using GrygTools.Utils.Core;
+using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Attributes
 {
     [CustomPropertyDrawer(typeof(SearchableEnumAttribute))]
 	public class SearchableEnumDrawer: PropertyDrawer

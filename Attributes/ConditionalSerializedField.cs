@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace GrygToolsUtils
+namespace GrygTools.Utils.Attributes
 {
 	/// <summary>
 	/// Hides a SerializeField in the editor based the name of another field in the class and comparison value
