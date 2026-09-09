@@ -39,6 +39,8 @@ namespace GrygTools.Utils.Core
 		private List<WeightedListEntry<T>> m_Entries = new();
 		
 		private bool m_Initialized = false;
+		public int Count => m_Entries.Count;
+		public bool IsEmpty => m_Entries.Count <= 0;
 
 		public void Add(uint weight, T content)
 		{
