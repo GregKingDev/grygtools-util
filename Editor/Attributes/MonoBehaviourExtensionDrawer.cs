@@ -61,8 +61,11 @@ namespace GrygTools.Utils.Attributes
                 if ((Application.isPlaying && buttonAttr.DrawMode == InspectorButtonDrawMode.EditorOnly) ||
                     (!Application.isPlaying && buttonAttr.DrawMode == InspectorButtonDrawMode.GameplayOnly))
                     continue;
-
+#if UNITY_6000_5_OR_NEWER
+                string methodKey = $"{target.GetEntityId()}.{method.Name}";
+#else
                 string methodKey = $"{target.GetInstanceID()}.{method.Name}";
+#endif
                 string label = string.IsNullOrEmpty(buttonAttr.ButtonLabel) ? method.Name : buttonAttr.ButtonLabel;
                 ParameterInfo[] parameters = method.GetParameters();
 
