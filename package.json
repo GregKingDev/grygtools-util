@@ -1,8 +1,8 @@
 {
   "name": "com.grygtools.utils",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "displayName": "GrygTools-Utils",
-  "description": "Miscellanous utils",
+  "description": "Miscellaneous utils",
   "unity": "2020.3",
   "dependencies": {
     "com.unity.addressables": "1.21.20",
