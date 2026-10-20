@@ -1,4 +1,5 @@
-﻿using GrygTools.Utils.Core;
+﻿using GrygTools.Audio;
+using GrygTools.Utils.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +46,7 @@ namespace GrygTools.Utils.Attributes
             GUIContent buttonText;
 	        buttonText = new GUIContent(GetButtonText(property));
             
-            if (DropdownButton(id, position, buttonText))
+            if (EditorUtils.DropdownButton(id, position, buttonText))
             {
                 Action<int> onSelect = i =>
                 {
@@ -63,31 +64,5 @@ namespace GrygTools.Utils.Attributes
             }
             EditorGUI.EndProperty();
         }
-		
-		protected static bool DropdownButton(int id, Rect position, GUIContent content)
-		{
-			Event current = Event.current;
-			switch (current.type)
-			{
-				case EventType.MouseDown:
-					if (position.Contains(current.mousePosition) && current.button == 0)
-					{
-						Event.current.Use();
-						return true;
-					}
-					break;
-				case EventType.KeyDown:
-					if (GUIUtility.keyboardControl == id && current.character =='\n')
-					{
-						Event.current.Use();
-						return true;
-					}
-					break;
-				case EventType.Repaint:
-					EditorStyles.popup.Draw(position, content, id, false);
-					break;
-			}
-			return false;
-		} 
 	}
 }
